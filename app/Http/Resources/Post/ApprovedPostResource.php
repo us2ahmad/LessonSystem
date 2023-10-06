@@ -17,6 +17,8 @@ class ApprovedPostResource extends JsonResource
         return [
             'id' => $this->id,
             'teacher_id' => $this->teacher_id,
+            'teacher_name' => $this->teacher->name,
+            'teacher_phone' => $this->teacher->phone,
             'content' => $this->content,
             'price' => $this->price,
             'photos' => PhotoPostResource::collection($this->photos)

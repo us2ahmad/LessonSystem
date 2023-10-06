@@ -45,14 +45,14 @@ return [
             'provider' => 'admins',
             'hash' => false,
         ],
-        'student' => [
-            'driver' => 'jwt',
-            'provider' => 'students',
-            'hash' => false,
-        ],
         'teacher' => [
             'driver' => 'jwt',
             'provider' => 'teachers',
+            'hash' => false,
+        ],
+        'student' => [
+            'driver' => 'jwt',
+            'provider' => 'students',
             'hash' => false,
         ],
     ],
@@ -75,21 +75,21 @@ return [
     */
 
     'providers' => [
-            'admins' => [
-                'driver' => 'eloquent',
-                'model' => App\Models\Admin::class,
-            ],
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
+        ],
 
-             'students' => [
-                 'driver' => 'eloquent',
-                 'model' => App\Models\Student::class,
-            ],
-            'teachers' => [
-                'driver' => 'eloquent',
-                'model' => App\Models\Teacher::class,
-           ],
-       
-        
+        'students' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Student::class,
+        ],
+        'teachers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Teacher::class,
+        ],
+
+
 
         // 'users' => [
         //     'driver' => 'database',

@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class TeacherRegisterRequest extends FormRequest
+class AdminLoginRequest extends FormRequest
 {
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -31,12 +32,8 @@ class TeacherRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:teachers',
-            'password' => 'required|string|confirmed|min:6',
-            'phone'   => 'required|string|max:15',
-            'photo' => 'required|image|mimes:png,jpg,jpeg|max:2056',
-            'location' => 'string|required'
+            'email' => 'required|email|exists:admins,email',
+            'password' => 'required|string|min:6',
         ];
     }
 }

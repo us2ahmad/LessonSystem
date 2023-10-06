@@ -32,9 +32,8 @@ class PostController extends Controller
 
     public function showPostsApproved()
     {
-        $posts = Post::with('photos')
+        $posts = Post::with('photos')->with('teacher')
             ->whereStatus('approved')->get();
-
         return ApprovedPostResource::collection($posts);
     }
 

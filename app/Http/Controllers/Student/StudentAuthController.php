@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\{CheckEmailStudentRequest, NewPasswordStudentRequest, StudentLoginRequest, StudentRegisterRequest};
+use App\Mail\VerificationEmail;
 use App\Models\Student;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Services\LoginService\LoginService;
+use App\Services\StudentService\StudentRegisterService;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class StudentAuthController extends Controller
 {
@@ -17,52 +21,28 @@ class StudentAuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:student', ['except' => ['login', 'register']]);
+        $this->middleware('auth:student', ['except' => ['login', 'register', 'forgetpassword', 'checkToken']]);
     }
+
+
     /**
      * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function login(StudentLoginRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-        if (!$token = auth('student')->attempt($validator->validated())) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-        return $this->createNewToken($token);
+        return (new LoginService(new Student(), 'student'))->login($request);
     }
     /**
      * Register a User.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function register(Request $request)
+    public function register(StudentRegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:students',
-            'password' => 'required|string|confirmed|min:6',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-        $student = Student::create(array_merge(
-            $validator->validated(),
-            ['password' => bcrypt($request->password)]
-        ));
-        return response()->json([
-            'message' => 'Student successfully registered',
-            'user' => $student
-        ], 201);
+        return (new StudentRegisterService())->register($request);
     }
-
     /**
      * Log the user out (Invalidate the token).
      *
@@ -74,15 +54,6 @@ class StudentAuthController extends Controller
         return response()->json(['message' => 'Student successfully signed out']);
     }
     /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function refresh()
-    {
-        return $this->createNewToken(auth('student')->refresh());
-    }
-    /**
      * Get the authenticated User.
      *
      * @return \Illuminate\Http\JsonResponse
@@ -91,20 +62,35 @@ class StudentAuthController extends Controller
     {
         return response()->json(auth('student')->user());
     }
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function createNewToken($token)
+    public function forgetpassword(CheckEmailStudentRequest $request)
     {
+
+        $token = Str::random(32);
+        $student = Student::whereEmail($request->email)->first();
+        $student->remember_token = $token;
+        $student->save();
+        Mail::to($request->email)->send(new VerificationEmail($student));
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth('student')->user()
+            'message' => 'Password reset email sent successfully'
         ]);
+    }
+    public function checkToken($token, NewPasswordStudentRequest $request)
+    {
+        $student = Student::whereRememberToken($token)->first();
+        return $student
+            ? $this->updatepassword($student, $request)
+            : response()->json([
+                'message' => 'Invalid token'
+            ], 400);
+    }
+    public function updatepassword($student, $request)
+    {
+
+        $student->remember_token = null;
+        $student->password = Hash::make($request->password);
+        $student->save();
+        return response()->json([
+            'message' => 'password updated'
+        ], 200);
     }
 }

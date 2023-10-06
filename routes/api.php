@@ -1,8 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminAuthController;
-use App\Http\Controllers\Admin\AdminNotificationController;
-use App\Http\Controllers\Admin\PostStatusController;
+use App\Http\Controllers\Admin\{AdminAuthController, AdminNotificationController, PostStatusController};
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Student\StudentAuthController;
 use App\Http\Controllers\Teacher\TeacherAuthController;
@@ -26,57 +24,49 @@ Route::get('unauthorized', function () {
 })->name('login');
 
 
-Route::controller(AdminAuthController::class)
-    ->prefix('auth/admin')
+Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::post('/login', 'login');
-        Route::post('/register', 'register');
-        Route::post('/logout', 'logout');
-        Route::post('/refresh', 'refresh');
-        Route::get('/admin-profile', 'userProfile');
+        Route::controller(AdminAuthController::class)->group(function () {
+            Route::post('login', 'login');
+            Route::post('logout', 'logout');
+            Route::get('admin-profile', 'userProfile');
+        });
+        Route::controller(PostStatusController::class)->group(function () {
+            Route::post('status', 'changeStatus');
+        });
+        //Admin  Route Of Notification 
+        Route::controller(AdminNotificationController::class)
+            ->prefix('notification')->group(function () {
+                Route::get('getAll', 'index');
+                Route::get('unread', 'unread');
+                Route::post('makeRead', 'makeReadAll');
+                Route::delete('deleteAll', 'deleteAll');
+                Route::delete('delete/{id}', 'deleteById');
+            });
     });
-
-Route::controller(PostStatusController::class)->group(function () {
-
-    Route::post('status', 'changeStatus');
-});
-
-//Admin  Route Of Notification 
-Route::controller(AdminNotificationController::class)
-    ->prefix('notification')->group(function () {
-        Route::get('getAll', 'index');
-        Route::get('unread', 'unread');
-        Route::post('makeRead', 'makeReadAll');
-        Route::delete('deleteAll', 'deleteAll');
-        Route::delete('delete/{id}', 'deleteById');
-    });
-
 
 Route::controller(StudentAuthController::class)
-    ->prefix('auth/student')
+    ->prefix('student')
     ->name('student.')
     ->group(function () {
         Route::post('/login', 'login');
         Route::post('/register', 'register');
         Route::post('/logout', 'logout');
-        Route::post('/refresh', 'refresh');
         Route::get('/student-profile', 'userProfile');
+        Route::get('verify/{token}', 'verify');
     });
 
-
 Route::controller(TeacherAuthController::class)
-    ->prefix('auth/teacher')
+    ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
         Route::post('/login', 'login');
         Route::post('/register', 'register');
         Route::post('/logout', 'logout');
-        Route::post('/refresh', 'refresh');
         Route::get('/teacher-profile', 'userProfile');
         Route::get('verify/{token}', 'verify');
     });
-
 
 Route::controller(PostController::class)
     ->prefix('post')->group(function () {
@@ -86,3 +76,13 @@ Route::controller(PostController::class)
         Route::get('show/{id}', 'allDataPost');
         Route::get('approved', 'showPostsApproved');
     });
+
+
+
+Route::get('forgetpassword', [StudentAuthController::class, 'forgetpassword']);
+Route::post('resetpassword/{token}', [StudentAuthController::class, 'checkToken']);
+Route::post('updatepassword', [StudentAuthController::class, 'updatepassword'])->name('updatepassword');
+
+// Route::get('forgetpassword', [StudentAuthController::class, 'forgetpassword'])->name('forgetpassword');
+// Route::get('resetpassword/{token}', [StudentAuthController::class, 'checkToken'])->name('resetpassword');
+// Route::post('resetpassword/{student}', [StudentAuthController::class, 'updatepassword'])->name('updatepassword');

@@ -3,15 +3,11 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\TeacherRegisterRequest;
+use App\Http\Requests\Teacher\TeacherLoginRequest;
+use App\Http\Requests\Teacher\TeacherRegisterRequest;
 use App\Models\Teacher;
-use App\Services\TeacherService\TeacherLoginService\TeacherLoginService;
+use App\Services\LoginService\LoginService;
 use App\Services\TeacherService\TeacherRegisterService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-
 
 class TeacherAuthController extends Controller
 {
@@ -29,10 +25,10 @@ class TeacherAuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(LoginRequest $request)
+    public function login(TeacherLoginRequest $request)
     {
 
-        return (new TeacherLoginService())->login($request);
+        return (new LoginService(new Teacher(), 'teacher'))->login($request);
     }
     /**
      * Register a User.
@@ -83,21 +79,5 @@ class TeacherAuthController extends Controller
     public function userProfile()
     {
         return response()->json(auth('teacher')->user());
-    }
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function createNewToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth('teacher')->user()
-        ]);
     }
 }

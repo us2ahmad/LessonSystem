@@ -16,10 +16,10 @@ class VerificationEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    protected $teacher;
-    public function __construct($teacher)
+    protected $user;
+    public function __construct($user)
     {
-        $this->teacher = $teacher;
+        $this->user = $user;
     }
 
     /**
@@ -40,8 +40,8 @@ class VerificationEmail extends Mailable
         return new Content(
             markdown: 'email',
             with: [
-                'name' => $this->teacher->name,
-                'link' => env('APP_URL') . "?token=" . $this->teacher->remember_token
+                'name' => $this->user->name,
+                'link' => env('APP_URL') . "?token=" . $this->user->remember_token
             ]
         );
     }
