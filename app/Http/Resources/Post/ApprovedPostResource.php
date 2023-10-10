@@ -21,7 +21,9 @@ class ApprovedPostResource extends JsonResource
             'teacher_phone' => $this->teacher->phone,
             'content' => $this->content,
             'price' => $this->price,
-            'photos' => PhotoPostResource::collection($this->photos)
+            'photos' => PhotoPostResource::collection($this->photos),
+            'reviews' => PostReviewResource::collection($this->reviews)
+
         ];
     }
 }

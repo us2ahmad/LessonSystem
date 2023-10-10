@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->string('location')->nullable();
             $table->rememberToken();
+
             $table->timestamps();
         });
     }

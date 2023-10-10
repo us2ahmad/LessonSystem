@@ -62,22 +62,4 @@ class TeacherAuthController extends Controller
         auth('teacher')->logout();
         return response()->json(['message' => 'Teacher successfully signed out']);
     }
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function refresh()
-    {
-        return $this->createNewToken(auth('teacher')->refresh());
-    }
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function userProfile()
-    {
-        return response()->json(auth('teacher')->user());
-    }
 }

@@ -18,6 +18,7 @@ class Post extends Model
         'status'
     ];
 
+
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(Teacher::class);
@@ -26,5 +27,15 @@ class Post extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(PostPhoto::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(PostReview::class);
+    }
+
+    public function studentorder(): HasMany
+    {
+        return $this->hasMany(StudentOrder::class);
     }
 }

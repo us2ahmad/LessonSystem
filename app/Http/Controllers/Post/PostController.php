@@ -1,12 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Post;
 
+use App\Filters\PostFilter;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Posts\StoringPostRequest;
 use App\Http\Resources\Post\ApprovedPostResource;
 use App\Http\Resources\Post\ShowAllPostsResource;
 use App\Models\Post;
 use App\Services\PostService\StoringPostService;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Request;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class PostController extends Controller
 {
@@ -32,7 +38,9 @@ class PostController extends Controller
 
     public function showPostsApproved()
     {
-        $posts = Post::with('photos')->with('teacher')
+        $posts =    QueryBuilder::for(Post::class)
+            ->allowedFilters((new PostFilter())->filter())
+            ->with('photos')->with('teacher')
             ->whereStatus('approved')->get();
         return ApprovedPostResource::collection($posts);
     }
