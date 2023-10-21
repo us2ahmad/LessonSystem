@@ -3,14 +3,19 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\{CheckEmailStudentRequest, NewPasswordStudentRequest, StudentLoginRequest, StudentRegisterRequest};
-use App\Mail\VerificationEmail;
-use App\Models\Student;
-use App\Services\LoginService\LoginService;
+use App\Http\Requests\NewPasswordRequest;
+use App\Http\Requests\Student\{
+    CheckEmailStudentRequest,
+    StudentLoginRequest,
+    StudentRegisterRequest
+};
+use App\Services\AuthService\{
+    LoginService,
+    ForgotPasswordService
+};
 use App\Services\StudentService\StudentRegisterService;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use App\Models\Student;
+
 
 class StudentAuthController extends Controller
 {
@@ -21,7 +26,7 @@ class StudentAuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:student', ['except' => ['login', 'register', 'forgetpassword', 'checkToken']]);
+        $this->middleware('auth:student', ['except' => ['login', 'register', 'resetPassword', 'forgotPassword', 'verify']]);
     }
 
 
@@ -53,6 +58,19 @@ class StudentAuthController extends Controller
         auth('student')->logout();
         return response()->json(['message' => 'Student successfully signed out']);
     }
+
+    public function verify($token)
+    {
+        $student = Student::whereRememberToken($token)->first();
+        if (!$student) {
+            return response()->json(['message' => 'The Token is Invalid']);
+        }
+        $student->remember_token = null;
+        $student->email_verified_at = now();
+        $student->save();
+        return response()->json(['message' => 'Your Account has been verified']);
+    }
+
     /**
      * Get the authenticated User.
      *
@@ -62,35 +80,16 @@ class StudentAuthController extends Controller
     {
         return response()->json(auth('student')->user());
     }
-    public function forgetpassword(CheckEmailStudentRequest $request)
+    public function forgotPassword(CheckEmailStudentRequest $request)
     {
 
-        $token = Str::random(32);
-        $student = Student::whereEmail($request->email)->first();
-        $student->remember_token = $token;
-        $student->save();
-        Mail::to($request->email)->send(new VerificationEmail($student));
-        return response()->json([
-            'message' => 'Password reset email sent successfully'
-        ]);
+        return (new ForgotPasswordService(new Student()))
+            ->forgotPassword($request);
     }
-    public function checkToken($token, NewPasswordStudentRequest $request)
-    {
-        $student = Student::whereRememberToken($token)->first();
-        return $student
-            ? $this->updatepassword($student, $request)
-            : response()->json([
-                'message' => 'Invalid token'
-            ], 400);
-    }
-    public function updatepassword($student, $request)
-    {
 
-        $student->remember_token = null;
-        $student->password = Hash::make($request->password);
-        $student->save();
-        return response()->json([
-            'message' => 'password updated'
-        ], 200);
+    public function resetPassword($token, NewPasswordRequest $request)
+    {
+        return (new ForgotPasswordService(new Student()))
+            ->checkToken($token, $request);
     }
 }

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Post;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Posts\PostReviewRequest;
 use App\Http\Resources\Post\PostReviewResource;
+use App\Models\Post;
 use App\Models\PostReview;
-use Illuminate\Database\Query\Processors\PostgresProcessor;
 
 class PostReviewController extends Controller
 {
@@ -29,11 +29,17 @@ class PostReviewController extends Controller
     }
     public function postRate($id)
     {
-        $reviews = PostReview::wherePostId($id);
-        $avg = $reviews->sum('rate') / $reviews->count();
+        $post = Post::find($id);
+        if ($post) {
+            $reviews = PostReview::wherePostId($id);
+            $avg = $reviews->sum('rate') / $reviews->count();
+            return response()->json([
+                'total_rate' => round($avg, 1),
+                'data' => PostReviewResource::collection($reviews->get())
+            ]);
+        }
         return response()->json([
-            'total_rate' => round($avg, 1),
-            'data' => PostReviewResource::collection($reviews->get())
+            'message' => 'not found'
         ]);
     }
 }

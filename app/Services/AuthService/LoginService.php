@@ -1,6 +1,6 @@
 <?php
 
-namespace  App\Services\LoginService;
+namespace  App\Services\AuthService;
 
 use App\Models\Teacher;
 use App\Models\Admin;
@@ -67,9 +67,11 @@ class LoginService
             return response()->json(['message' => 'your Account is not Verified'], 422);
         }
         if ($this->guard == 'teacher') {
-            if ($this->getStatus($request->email) == 0) {
+            if ($this->getStatus($request->email) == 'pending') {
                 return response()->json(['message' => 'Account is Pending'], 422);
-            };
+            } elseif ($this->getStatus($request->email) == 'rejected') {
+                return response()->json(['message' => 'Account is Pending'], 422);
+            }
         }
         return $this->createNewToken($token);
     }

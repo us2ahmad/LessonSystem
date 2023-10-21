@@ -30,19 +30,32 @@ class PostController extends Controller
     public function deleteById($id)
     {
 
-        Post::find($id)->delete();
-        return response()->json([
-            'message' => 'deleted success'
-        ]);
+        $post =  Post::where('id', $id)
+            ->where('teacher_id', auth('teacher')->id())
+            ->delete();
+        return $post ?
+            response()->json([
+                'message' => 'deleted success'
+            ])
+            :  response()->json([
+                'message' => 'not found'
+            ]);
     }
 
     public function showPostsApproved()
     {
         $posts =    QueryBuilder::for(Post::class)
             ->allowedFilters((new PostFilter())->filter())
-            ->with('photos')->with('teacher')
-            ->whereStatus('approved')->get();
-        return ApprovedPostResource::collection($posts);
+            ->whereStatus('approved')
+            ->with('photos')
+            ->with('teacher')
+            ->get();
+
+        return count($posts) > 0
+            ? ApprovedPostResource::collection($posts)
+            : response()->json([
+                'message' => 'not found'
+            ]);
     }
 
     public function allDataPost($id)
@@ -51,6 +64,10 @@ class PostController extends Controller
             ->whereStatus('approved')
             ->where('id', $id)
             ->first();
-        return  new ApprovedPostResource($post);
+        return ($post)
+            ? new ApprovedPostResource($post)
+            : response()->json([
+                'message' => 'not found'
+            ]);
     }
 }

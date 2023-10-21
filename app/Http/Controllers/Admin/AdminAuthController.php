@@ -3,51 +3,33 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\AdminLoginRequest;
+use App\Http\Requests\Admin\{AdminLoginRequest, CheckEmailAdminRequest};
+use App\Http\Requests\NewPasswordRequest;
 use App\Models\Admin;
-use App\Services\LoginService\LoginService;
-
-
+use App\Services\AuthService\{LoginService, ForgotPasswordService};
 
 class AdminAuthController extends Controller
 {
-    /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth:admin', ['except' => 'login']);
+        $this->middleware('auth:admin', ['except' => ['login', 'forgotPassword', 'resetPassword']]);
     }
-    /**
-     * Get a JWT via given credentials.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function login(AdminLoginRequest $request)
     {
         return (new LoginService(new Admin()))->login($request);
     }
-
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function logout()
     {
         auth('admin')->logout();
         return response()->json(['message' => 'Admin successfully signed out']);
     }
-
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function userProfile()
+    public function forgotPassword(CheckEmailAdminRequest $request)
     {
-        return response()->json(auth('admin')->user());
+        return (new ForgotPasswordService(new Admin()))->forgotPassword($request);
+    }
+    public function resetPassword($token, NewPasswordRequest $request)
+    {
+        return (new ForgotPasswordService(new Admin()))
+            ->checkToken($token, $request);
     }
 }

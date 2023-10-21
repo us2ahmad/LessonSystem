@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('teachers', function (Blueprint $table) {
-            $table->boolean('status')->default(0);
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('teachers', function (Blueprint $table) {
-           $table->dropColumn('status');
+            $table->dropColumn('status');
         });
     }
 };

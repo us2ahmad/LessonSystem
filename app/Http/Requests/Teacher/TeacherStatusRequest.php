@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Student;
+namespace App\Http\Requests\Teacher;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class NewPasswordStudentRequest extends FormRequest
+class TeacherStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,8 +31,8 @@ class NewPasswordStudentRequest extends FormRequest
     public function rules(): array
     {
         return [
-
-            'password' => 'string|required|min:8|confirmed'
+            'teacher_id' => 'integer|required|exists:teachers,id',
+            'status' => 'required|in:approved,rejected'
         ];
     }
 }

@@ -60,7 +60,7 @@ class StudentRegisterService
             $data = $this->validation($request);
             $email = $this->store($data, $request);
             $student = $this->generateToken($email);
-            $this->sendEmail($student);
+            // $this->sendEmail($student);
             DB::commit();
             return response()->json(['message' => 'Account has been created please check your Email']);
         } catch (Exception $e) {

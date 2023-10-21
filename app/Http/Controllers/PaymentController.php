@@ -2,24 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
-use Illuminate\Http\Request;
+use App\Services\PayService\PayService;
 
 class PaymentController extends Controller
 {
-
-    public function pay()
+    public function pay($servicesId)
     {
-
-        $link = auth('student')->user()->charge(12.99, 'Action Figure');
-        return response()->json([
-            'link' => $link
-        ]);
+        return (new PayService())->payment($servicesId);
     }
-    // public function pay()
-    // {
-
-    //     $link = Student::find(1)->charge(12.99, 'Action Figure');
-    //     return view('pay', compact('link'));
-    // }
 }

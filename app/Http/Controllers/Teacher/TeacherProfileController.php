@@ -8,7 +8,6 @@ use App\Http\Resources\Teacher\TeacherProfileResource;
 use App\Models\PostReview;
 use App\Models\Teacher;
 use App\Services\TeacherService\UpdatingProfileService;
-use Illuminate\Http\Request;
 
 class TeacherProfileController extends Controller
 {
@@ -16,7 +15,6 @@ class TeacherProfileController extends Controller
     {
         $this->middleware('auth:teacher');
     }
-
     public function profile()
     {
         $teacherId = auth('teacher')->id();

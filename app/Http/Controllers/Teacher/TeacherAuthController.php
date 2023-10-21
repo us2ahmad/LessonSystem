@@ -3,10 +3,17 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Teacher\TeacherLoginRequest;
-use App\Http\Requests\Teacher\TeacherRegisterRequest;
+use App\Http\Requests\NewPasswordRequest;
+use App\Http\Requests\Teacher\{
+    TeacherLoginRequest,
+    CheckEmailTeacherRequest,
+    TeacherRegisterRequest
+};
 use App\Models\Teacher;
-use App\Services\LoginService\LoginService;
+use App\Services\AuthService\{
+    ForgotPasswordService,
+    LoginService
+};
 use App\Services\TeacherService\TeacherRegisterService;
 
 class TeacherAuthController extends Controller
@@ -18,7 +25,7 @@ class TeacherAuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:teacher', ['except' => ['login', 'register', 'verify']]);
+        $this->middleware('auth:teacher', ['except' => ['login', 'register', 'verify', 'resetPassword', 'forgotPassword']]);
     }
     /**
      * Get a JWT via given credentials.
@@ -61,5 +68,16 @@ class TeacherAuthController extends Controller
     {
         auth('teacher')->logout();
         return response()->json(['message' => 'Teacher successfully signed out']);
+    }
+    public function forgotPassword(CheckEmailTeacherRequest $request)
+    {
+        return (new ForgotPasswordService(new Teacher()))
+            ->forgotPassword($request);
+    }
+
+    public function resetPassword($token, NewPasswordRequest $request)
+    {
+        return (new ForgotPasswordService(new Teacher()))
+            ->checkToken($token, $request);
     }
 }

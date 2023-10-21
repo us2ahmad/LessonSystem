@@ -28,9 +28,11 @@ class TeacherOrderController extends Controller
 
     public  function updateStatus(Request $request)
     {
-        $order = StudentOrder::where('id', $request->order_id)->whereHas('post', function ($query) {
-            $query->where('teacher_id', auth('teacher')->id());
-        })->first();
+        $order = StudentOrder::where('id', $request->order_id)
+            ->whereHas('post', function ($query) {
+                $query->where('teacher_id', auth('teacher')->id());
+            })->first();
+
         if ($order) {
             $order->setAttribute('status', $request->status)->save();
             return   response()->json([

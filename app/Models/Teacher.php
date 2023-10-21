@@ -12,7 +12,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class Teacher extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable;
     /**
      * The attributes that are mass assignable.
      *
@@ -24,8 +24,10 @@ class Teacher extends Authenticatable implements JWTSubject
         'password',
         'phone',
         'photo',
-        'location'
+        'location',
+        'password_token'
     ];
+    protected $guarded = ['status'];
 
     public function posts(): HasMany
     {

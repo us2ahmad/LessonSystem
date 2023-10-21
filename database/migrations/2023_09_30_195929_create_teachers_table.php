@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('photo')->nullable();
             $table->string('location')->nullable();
+            $table->string('password_token')->nullable();
             $table->rememberToken();
-
             $table->timestamps();
         });
     }

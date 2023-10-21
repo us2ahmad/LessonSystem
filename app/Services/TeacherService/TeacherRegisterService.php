@@ -61,7 +61,7 @@ class TeacherRegisterService
             $data = $this->validation($request);
             $email = $this->store($request, $data);
             $teacher = $this->generateToken($email);
-            $this->sendEmail($teacher);
+            // $this->sendEmail($teacher);
             DB::commit();
             return response()->json([
                 'message' => 'Account has been created please check your Email',
